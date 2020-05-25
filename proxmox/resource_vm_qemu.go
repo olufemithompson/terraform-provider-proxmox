@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	pxapi "github.com/Telmate/proxmox-api-go/proxmox"
+	pxapi "github.com/olufemithompson/proxmox-api-go-fork/proxmox"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -125,6 +125,11 @@ func resourceVmQemu() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "host",
+			},
+                        "kvm": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"numa": {
 				Type:     schema.TypeBool,
@@ -508,6 +513,7 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 		QemuSockets:  d.Get("sockets").(int),
 		QemuVcpus:    d.Get("vcpus").(int),
 		QemuCpu:      d.Get("cpu").(string),
+                kvm:          d.Get("kvm").(bool),
 		QemuNuma:     d.Get("numa").(bool),
 		Hotplug:      d.Get("hotplug").(string),
 		Scsihw:       d.Get("scsihw").(string),
@@ -714,6 +720,7 @@ func resourceVmQemuUpdate(d *schema.ResourceData, meta interface{}) error {
 		QemuSockets:  d.Get("sockets").(int),
 		QemuVcpus:    d.Get("vcpus").(int),
 		QemuCpu:      d.Get("cpu").(string),
+                kvm:          d.Get("kvm").(bool),
 		QemuNuma:     d.Get("numa").(bool),
 		Hotplug:      d.Get("hotplug").(string),
 		Scsihw:       d.Get("scsihw").(string),
@@ -819,6 +826,7 @@ func resourceVmQemuRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("sockets", config.QemuSockets)
 	d.Set("vcpus", config.QemuVcpus)
 	d.Set("cpu", config.QemuCpu)
+        d.Set("kvm", config.kvm)
 	d.Set("numa", config.QemuNuma)
 	d.Set("hotplug", config.Hotplug)
 	d.Set("scsihw", config.Scsihw)
