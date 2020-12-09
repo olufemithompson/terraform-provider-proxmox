@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/olufemithompson/terraform-provider-proxmox-fork/proxmox"
-	"github.com/hashicorp/terraform/plugin"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/olufemithompson/terraform-provider-proxmox/proxmox"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: func() terraform.ResourceProvider {
+		ProviderFunc: func() *schema.Provider {
 			return proxmox.Provider()
 		},
 	})

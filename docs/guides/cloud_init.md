@@ -3,7 +3,7 @@
 ## Sample file
 
 main.tf:
-```tf
+```hcl
 /* Uses cloud-init options from Proxmox 5.2 */
 resource "proxmox_vm_qemu" "cloudinit-test" {
   name = "tftest1.xyz.com"
@@ -209,10 +209,6 @@ EOF
     inline = [
       "ip a"
     ]
-  }
-
-  provisioner "proxmox" {
-    action = "sshbackward"
   }
 }
 

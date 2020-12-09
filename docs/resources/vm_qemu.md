@@ -1,4 +1,4 @@
-# Terraform VM Qemu Resource
+# VM Qemu Resource
 
 Resources are the most important element in the Terraform language. Each resource block describes one or more 
 infrastructure objects, such as virtual networks, compute instances, or higher-level components such as DNS records.
@@ -13,7 +13,7 @@ base with an ISO, and make the rest of the VM resources depend on that base "tem
 When creating a VM Qemu resource, you create a `proxmox_vm_qemu` resource block. The name and target node of the VM are
 the only required parameters.
 
-```tf
+```hcl
 resource "proxmox_vm_qemu" "resource-name" {
     name = "VM name"
     target_node = "Node to create the VM on"
@@ -25,7 +25,7 @@ resource "proxmox_vm_qemu" "resource-name" {
 With preprovision you can provision a VM directly from the resource block. This provisioning method is therefore ran
 **before** provision blocks. When using preprovision, there are three `os_type` options: `ubuntu`, `centos` or `cloud-init`.
 
-```tf
+```hcl
 resource "proxmox_vm_qemu" "prepprovision-test" {
     ...
     preprovision = true
@@ -39,7 +39,7 @@ There is a pre-provision phase which is used to set a hostname, intialize eth0, 
 space. This is done over SSH with the `ssh_forward_ip`, `ssh_user` and `ssh_private_key`. Disk resize is done if the file 
 [/etc/auto_resize_vda.sh](https://github.com/Telmate/terraform-ubuntu-proxmox-iso/blob/master/auto_resize_vda.sh) exists.
 
-```tf
+```hcl
 resource "proxmox_vm_qemu" "prepprovision-test" {
     ...
     preprovision = true
@@ -71,10 +71,10 @@ EOF
 
 Cloud-init VMs must be cloned from a [cloud-init ready template](https://pve.proxmox.com/wiki/Cloud-Init_Support). When
 creating a resource that is using Cloud-Init, there are multi configurations possible. You can use either the `ciconfig`
-parameter to create based on [https://cloudinit.readthedocs.io/en/latest/topics/examples.html](a Cloud-init configuration file)
+parameter to create based on [a Cloud-init configuration file](https://cloudinit.readthedocs.io/en/latest/topics/examples.html)
 or use the Proxmox variable `ciuser`, `cipassword`, `ipconfig0`, `ipconfig1`, `searchdomain`, `nameserver` and `sshkeys`.
 
-For more information, see the [Cloud-init guide](cloud_init_guide.md).
+For more information, see the [Cloud-init guide](docs/guides/cloud_init.md).
 
 ## Argument reference
 
@@ -82,14 +82,16 @@ The following arguments are supported in the resource block:
 
 * `name` - (Required) Name of the VM
 * `target_node` - (Required) Node to place the VM on
+* `vmid` - (Optional; integer) ID of the VM in Proxmox, defaults to 0 which indicates it should use the next number in the sequence.
 * `desc` - (Optional) Description of the VM
+* `define_connection_info` - (Optional; defaults to true) define the (SSH) connection parameters for preprovisioners, see config block below.
 * `bios` - (Optional; defaults to seabios)
 * `onboot` - (Optional)
 * `boot` - (Optional; defaults to cdn)
 * `bootdisk` - (Optional; defaults to true)
 * `agent` - (Optional; defaults to 0)
 * `iso` - (Optional)
-* `clone` - (Optional)
+* `clone` - (Optional) - The name of the VM to clone into a new VM
 * `full_clone` - (Optional)
 * `hastate` - (Optional) 
 * `qemu_os` - (Optional; defaults to l26)
@@ -120,13 +122,16 @@ The following arguments are supported in the resource block:
     * `id` (Required)
     * `type` (Required)
     * `storage` (Required)
-    * `storage_type` (Optional; defaults to dir) One of PVE types [as described in their documentation](https://pve.proxmox.com/wiki/Storage).
     * `size` (Required)
     * `format` (Optional; defaults to raw)
     * `cache` (Optional; defaults to none)
     * `backup` (Optional; defaults to false)
     * `iothread` (Optional; defaults to false)
     * `replicate` (Optional; defaults to false)
+    * `ssd` (Optional; defaults to false) //Whether to expose this drive as an SSD, rather than a rotational hard disk.
+    * `file` (Optional)
+    * `media` (Optional)
+    * `discard` (Optional; defaults to ignore) //Controls whether to pass discard/trim requests to the underlying storage. discard=<ignore | on>
     * `mbps` (Optional; defaults to unlimited being 0) Maximum r/w speed in megabytes per second
     * `mbps_rd` (Optional; defaults to unlimited being 0) Maximum read speed in megabytes per second
     * `mbps_rd_max` (Optional; defaults to unlimited being 0) Maximum unthrottled read pool in megabytes per second
@@ -140,8 +145,9 @@ The following arguments are supported in the resource block:
 * `clone_wait` - (Optional)
 * `preprovision` - (Optional; defaults to true)
 * `os_type` - (Optional) Which provisioning method to use, based on the OS type. Possible values: ubuntu, centos, cloud-init.
+* `force_recreate_on_change_of` (Optional) // Allows this to depend on another resource, that when changed, needs to re-create this vm. An example where this is useful is a cloudinit configuration (as the `cicustom` attribute points to a file not the content).
 
-The following arguments are specifically for Linux for preprovisioning.
+The following arguments are specifically for Linux for preprovisioning (requires `define_connection_info` to be true).
 
 * `os_network_config` - (Optional) Linux provisioning specific, `/etc/network/interfaces` for Ubuntu and `/etc/sysconfig/network-scripts/ifcfg-eth0` for CentOS.
 * `ssh_forward_ip` - (Optional) Address used to connect to the VM

@@ -1,11 +1,12 @@
-provider "proxmox" {
-    pm_tls_insecure = true
-    pm_api_url = "https://proxmox.org/api2/json"
-    pm_password = "supersecret"
-    pm_user = "terraform-user@pve"
-    pm_otp = ""
-}
+# LXC Resource
 
+Resources are the most important element in the Terraform language. Each resource block describes one or more 
+infrastructure objects, such as virtual networks, compute instances, or higher-level components such as DNS records.
+
+This resource manages a Proxmox LXC container.
+
+
+```hcl
 resource "proxmox_lxc" "lxc-test" {
     features {
         nesting = true
@@ -23,3 +24,4 @@ resource "proxmox_lxc" "lxc-test" {
     target_node = "node-01"
     unprivileged = true
 }
+```
